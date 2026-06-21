@@ -2,9 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Layout from "@/components/Layout";
-import { Copy, ArrowRight, TrendingUp, Zap, AlertTriangle } from "lucide-react";
+import { TrendingUp, Zap, AlertTriangle } from "lucide-react";
 import { analyzeSql } from "@/features/sql/analyzeSql";
+import { useAuth } from "@/features/auth/AuthContext";
+import { saveQuery } from "@/features/history/historyService";
+import { toast } from "sonner";
 
 export default function Home() {
   const [sqlQuery, setSqlQuery] = useState(`SELECT u.name,
@@ -17,6 +21,10 @@ GROUP BY u.name;`);
   const [showExplanation, setShowExplanation] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const { user } = useAuth();
+  const router = useRouter();
 
   const samples = [
     `SELECT u.name, COUNT(o.id)
@@ -49,6 +57,39 @@ GROUP BY u.name;`,
     const query = samples[nextIdx];
     setSqlQuery(query);
     handleExplain(query);
+  };
+
+  const handleSaveQuery = async () => {
+    if (!user) {
+      toast("Sign in to save queries", {
+        description: "You must be signed in to save query explanation history.",
+        action: {
+          label: "Sign In",
+          onClick: () => router.push("/sign-in"),
+        },
+      });
+      return;
+    }
+
+    if (!analysis || !analysis.success) {
+      toast.error("No valid query explanation to save.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await saveQuery({
+        query_text: analysis.query,
+        explanation: analysis.explanation,
+        complexity: analysis.complexity,
+        optimization_tips: analysis.optimizationTips || [],
+      });
+      toast.success("Query saved to history!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save query.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Run initial explanation on default query on mount
@@ -211,9 +252,23 @@ GROUP BY u.name;`,
                 className="border-4 border-black bg-white p-8 mb-8"
                 style={{ boxShadow: "8px 8px 0px #111111" }}
               >
-                <p className="text-lg leading-relaxed">
+                <p className="text-lg leading-relaxed mb-6">
                   {analysis.explanation}
                 </p>
+                <button
+                  onClick={handleSaveQuery}
+                  disabled={saving}
+                  className="border-4 border-primary bg-primary text-white font-bold uppercase text-xs px-4 py-2 transition-transform duration-150 ease-out cursor-pointer disabled:opacity-50"
+                  style={{ boxShadow: "4px 4px 0px #6D28D9" }}
+                  onMouseEnter={e => {
+                    if (!saving) (e.currentTarget as HTMLElement).style.boxShadow = "2px 2px 0px #6D28D9";
+                  }}
+                  onMouseLeave={e => {
+                    if (!saving) (e.currentTarget as HTMLElement).style.boxShadow = "4px 4px 0px #6D28D9";
+                  }}
+                >
+                  {saving ? "SAVING..." : "SAVE QUERY"}
+                </button>
               </div>
 
               {/* Breakdown Table */}
@@ -354,6 +409,11 @@ GROUP BY u.name;`,
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
+                onClick={() => {
+                  const el = document.querySelector("textarea");
+                  el?.scrollIntoView({ behavior: "smooth" });
+                  el?.focus();
+                }}
                 className="border-4 border-white bg-white text-primary font-bold uppercase text-sm px-8 py-3 transition-transform duration-150 ease-out cursor-pointer"
                 style={{ boxShadow: "8px 8px 0px #FFFFFF" }}
                 onMouseEnter={e => {

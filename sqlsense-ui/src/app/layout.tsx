@@ -2,6 +2,7 @@ import "@/app/globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/features/auth/AuthContext";
 
 export const metadata = {
   title: "SQLSense — Understand SQL Instantly",
@@ -18,10 +19,12 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <ThemeProvider defaultTheme="light">
-          <TooltipProvider>
-            <Toaster />
-            {children}
-          </TooltipProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              {children}
+            </TooltipProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

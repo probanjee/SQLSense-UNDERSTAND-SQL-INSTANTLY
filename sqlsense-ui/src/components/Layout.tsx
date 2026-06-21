@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "@/features/auth/AuthContext";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface LayoutProps {
 
 export default function Layout({ children, currentPage }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const navItems = [
     { label: "Home", path: "/" },
@@ -56,29 +58,52 @@ export default function Layout({ children, currentPage }: LayoutProps) {
           </nav>
 
           {/* Auth Links */}
-          <div className="hidden md:flex items-center gap-2">
-            <Link
-              href="/sign-in"
-              className="px-4 py-2 text-sm font-semibold uppercase hover:bg-gray-100 transition-colors cursor-pointer"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/sign-up"
-              className="border-4 border-primary bg-primary text-white font-bold uppercase text-sm px-4 py-2 inline-block transition-transform duration-150 ease-out cursor-pointer"
-              style={{ boxShadow: "8px 8px 0px #6D28D9" }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.boxShadow =
-                  "4px 4px 0px #6D28D9";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.boxShadow =
-                  "8px 8px 0px #6D28D9";
-              }}
-            >
-              Sign Up
-            </Link>
-          </div>
+          {user ? (
+            <div className="hidden md:flex items-center gap-4">
+              <span className="text-xs font-mono font-semibold text-muted-foreground border-2 border-black px-2 py-1 bg-gray-100">
+                {user.email}
+              </span>
+              <button
+                onClick={() => signOut()}
+                className="border-4 border-black bg-white text-black font-bold uppercase text-sm px-4 py-2 transition-transform duration-150 ease-out cursor-pointer"
+                style={{ boxShadow: "4px 4px 0px #111111" }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow =
+                    "2px 2px 0px #111111";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow =
+                    "4px 4px 0px #111111";
+                }}
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div className="hidden md:flex items-center gap-2">
+              <Link
+                href="/sign-in"
+                className="px-4 py-2 text-sm font-semibold uppercase hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/sign-up"
+                className="border-4 border-primary bg-primary text-white font-bold uppercase text-sm px-4 py-2 inline-block transition-transform duration-150 ease-out cursor-pointer"
+                style={{ boxShadow: "8px 8px 0px #6D28D9" }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow =
+                    "4px 4px 0px #6D28D9";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow =
+                    "8px 8px 0px #6D28D9";
+                }}
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
 
           {/* Mobile Menu Button */}
           <button
@@ -108,31 +133,49 @@ export default function Layout({ children, currentPage }: LayoutProps) {
                   {item.label}
                 </Link>
               ))}
-              <div className="flex flex-col gap-2 pt-2 border-t-2 border-gray-200">
-                <Link
-                  href="/sign-in"
-                  onClick={() => setSidebarOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold uppercase hover:bg-gray-100 transition-colors cursor-pointer"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/sign-up"
-                  onClick={() => setSidebarOpen(false)}
-                  className="block border-4 border-primary bg-primary text-white font-bold uppercase text-sm px-4 py-2 text-center transition-transform duration-150 ease-out cursor-pointer"
-                  style={{ boxShadow: "8px 8px 0px #6D28D9" }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.boxShadow =
-                      "4px 4px 0px #6D28D9";
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.boxShadow =
-                      "8px 8px 0px #6D28D9";
-                  }}
-                >
-                  Sign Up
-                </Link>
-              </div>
+              {user ? (
+                <div className="flex flex-col gap-2 pt-2 border-t-2 border-gray-200">
+                  <span className="block px-4 py-2 text-xs font-mono font-semibold text-muted-foreground break-all">
+                    Logged in: {user.email}
+                  </span>
+                  <button
+                    onClick={() => {
+                      signOut();
+                      setSidebarOpen(false);
+                    }}
+                    className="block border-4 border-black bg-white text-black font-bold uppercase text-sm px-4 py-2 text-center transition-transform duration-150 ease-out cursor-pointer"
+                    style={{ boxShadow: "4px 4px 0px #111111" }}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 pt-2 border-t-2 border-gray-200">
+                  <Link
+                    href="/sign-in"
+                    onClick={() => setSidebarOpen(false)}
+                    className="block px-4 py-3 text-sm font-semibold uppercase hover:bg-gray-100 transition-colors cursor-pointer"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/sign-up"
+                    onClick={() => setSidebarOpen(false)}
+                    className="block border-4 border-primary bg-primary text-white font-bold uppercase text-sm px-4 py-2 text-center transition-transform duration-150 ease-out cursor-pointer"
+                    style={{ boxShadow: "8px 8px 0px #6D28D9" }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.boxShadow =
+                        "4px 4px 0px #6D28D9";
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.boxShadow =
+                        "8px 8px 0px #6D28D9";
+                    }}
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
             </div>
           </nav>
         )}

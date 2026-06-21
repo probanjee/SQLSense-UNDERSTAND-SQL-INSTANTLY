@@ -1,12 +1,70 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Layout from "@/components/Layout";
+import { supabase } from "@/lib/supabase/client";
+import { useAuth } from "@/features/auth/AuthContext";
+import { toast } from "sonner";
 
 export default function SignIn() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user && !authLoading) {
+      router.push("/dashboard");
+    }
+  }, [user, authLoading, router]);
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Successfully signed in!");
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSocialSignIn = async (provider: "github" | "google") => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      toast.error(err.message || `Failed to sign in with ${provider}`);
+    }
+  };
+
   return (
     <Layout currentPage="/sign-in">
-      <div className="bg-gray-50 min-h-[calc(100vh-200px)] flex items-center">
+      <div className="bg-gray-50 min-h-[calc(100vh-200px)] flex items-center py-12">
         <div className="container">
           <div className="max-w-md mx-auto">
             <div
@@ -18,7 +76,7 @@ export default function SignIn() {
                 Welcome back to SQLSense
               </p>
 
-              <form className="space-y-6" onSubmit={e => e.preventDefault()}>
+              <form className="space-y-6" onSubmit={handleSignIn}>
                 {/* Email */}
                 <div>
                   <label className="block text-sm font-bold uppercase mb-2">
@@ -27,7 +85,10 @@ export default function SignIn() {
                   <input
                     type="email"
                     placeholder="your@email.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
                     className="border-4 border-black bg-white w-full px-4 py-3 text-base font-sans focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
                   />
                 </div>
 
@@ -39,40 +100,33 @@ export default function SignIn() {
                   <input
                     type="password"
                     placeholder="••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
                     className="border-4 border-black bg-white w-full px-4 py-3 text-base font-sans focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
                   />
-                </div>
-
-                {/* Remember Me */}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="remember"
-                    className="w-4 h-4 border-2 border-black cursor-pointer"
-                  />
-                  <label
-                    htmlFor="remember"
-                    className="text-sm font-semibold cursor-pointer"
-                  >
-                    Remember me
-                  </label>
                 </div>
 
                 {/* Sign In Button */}
                 <button
                   type="submit"
-                  className="border-4 border-primary bg-primary text-white font-bold uppercase text-sm px-6 py-3 w-full transition-transform duration-150 ease-out cursor-pointer"
+                  disabled={loading}
+                  className="border-4 border-primary bg-primary text-white font-bold uppercase text-sm px-6 py-3 w-full transition-transform duration-150 ease-out cursor-pointer disabled:opacity-50"
                   style={{ boxShadow: "8px 8px 0px #6D28D9" }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.boxShadow =
-                      "4px 4px 0px #6D28D9";
+                    if (!loading) {
+                      (e.currentTarget as HTMLElement).style.boxShadow =
+                        "4px 4px 0px #6D28D9";
+                    }
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.boxShadow =
-                      "8px 8px 0px #6D28D9";
+                    if (!loading) {
+                      (e.currentTarget as HTMLElement).style.boxShadow =
+                        "8px 8px 0px #6D28D9";
+                    }
                   }}
                 >
-                  SIGN IN
+                  {loading ? "SIGNING IN..." : "SIGN IN"}
                 </button>
               </form>
 
@@ -88,6 +142,7 @@ export default function SignIn() {
               {/* Social Sign In */}
               <div className="space-y-3">
                 <button
+                  onClick={() => handleSocialSignIn("github")}
                   className="border-4 border-black bg-white text-black font-bold uppercase text-sm px-6 py-3 w-full transition-transform duration-150 ease-out cursor-pointer"
                   style={{ boxShadow: "8px 8px 0px #111111" }}
                   onMouseEnter={e => {
@@ -102,6 +157,7 @@ export default function SignIn() {
                   SIGN IN WITH GITHUB
                 </button>
                 <button
+                  onClick={() => handleSocialSignIn("google")}
                   className="border-4 border-black bg-white text-black font-bold uppercase text-sm px-6 py-3 w-full transition-transform duration-150 ease-out cursor-pointer"
                   style={{ boxShadow: "8px 8px 0px #111111" }}
                   onMouseEnter={e => {
@@ -127,16 +183,6 @@ export default function SignIn() {
                   Sign Up
                 </Link>
               </p>
-
-              {/* Forgot Password Link */}
-              <p className="text-center text-sm mt-2">
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Forgot password?
-                </a>
-              </p>
             </div>
           </div>
         </div>
@@ -144,3 +190,4 @@ export default function SignIn() {
     </Layout>
   );
 }
+
