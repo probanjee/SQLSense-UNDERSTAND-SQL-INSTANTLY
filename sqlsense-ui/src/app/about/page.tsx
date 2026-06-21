@@ -1,5 +1,5 @@
 import Layout from "@/components/Layout";
-import { Zap, Users, Lightbulb, Code } from "lucide-react";
+import { Zap, Users, Lightbulb, Code, Mail, Github, Linkedin } from "lucide-react";
 
 export default function About() {
   const features = [
@@ -128,45 +128,42 @@ export default function About() {
                   Software Developer
                 </p>
                 <p className="text-base text-muted-foreground mb-6">
-                  Prosun is a passionate software developer who believes in
+                  I am a passionate software developer who believes in
                   crafting premium, intentional digital experiences. SQLSense
-                  represents his commitment to building tools that empower
+                  represents my commitment to building tools that empower
                   developers to master their craft.
                 </p>
-                <div className="border-t-2 border-gray-200 pt-6">
-                  <p className="font-semibold mb-3">Get in Touch</p>
-                  <div className="flex flex-col gap-2 text-sm">
-                    <p className="text-muted-foreground">
-                      Email:{" "}
-                      <a
-                        href="mailto:prosunbanerjee8@gmail.com"
-                        className="font-semibold text-primary hover:underline cursor-pointer"
-                      >
-                        prosunbanerjee8@gmail.com
-                      </a>
-                    </p>
-                    <p className="text-muted-foreground">
-                      GitHub:{" "}
-                      <a
-                        href="https://github.com/prosu"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-semibold text-primary hover:underline cursor-pointer"
-                      >
-                        github.com/prosu
-                      </a>
-                    </p>
-                    <p className="text-muted-foreground">
-                      LinkedIn:{" "}
-                      <a
-                        href="https://linkedin.com/in/prosun-banerjee"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-semibold text-primary hover:underline cursor-pointer"
-                      >
-                        linkedin.com/in/prosun-banerjee
-                      </a>
-                    </p>
+                <div className="border-t-4 border-black pt-6">
+                  <p className="font-bold text-sm uppercase mb-4 tracking-wider text-muted-foreground">Get in Touch</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <a
+                      href="mailto:prosunbanerjee8@gmail.com"
+                      className="flex items-center justify-center gap-2 border-2 border-black bg-white px-4 py-3 font-semibold text-sm hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                      style={{ boxShadow: "4px 4px 0px #000000" }}
+                    >
+                      <Mail size={16} />
+                      <span>Email</span>
+                    </a>
+                    <a
+                      href="https://github.com/prosu"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 border-2 border-black bg-white px-4 py-3 font-semibold text-sm hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                      style={{ boxShadow: "4px 4px 0px #000000" }}
+                    >
+                      <Github size={16} />
+                      <span>GitHub</span>
+                    </a>
+                    <a
+                      href="https://linkedin.com/in/prosun-banerjee"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 border-2 border-black bg-white px-4 py-3 font-semibold text-sm hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                      style={{ boxShadow: "4px 4px 0px #000000" }}
+                    >
+                      <Linkedin size={16} />
+                      <span>LinkedIn</span>
+                    </a>
                   </div>
                 </div>
               </div>
