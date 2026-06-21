@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SQLSense — Understand SQL Instantly
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -156,3 +157,6 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 *   **Author:** Prosun Banerjee
 *   **Email:** [prosunbanerjee8@gmail.com](mailto:prosunbanerjee8@gmail.com)
+=======
+# SQLSense-UNDERSTAND-SQL-INSTANTLY
+>>>>>>> 6b7cde592c8a6d0438274e3405453d7ffc41c170
