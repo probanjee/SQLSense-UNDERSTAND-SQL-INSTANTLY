@@ -41,4 +41,16 @@ describe("SQLSense Explanation Engine", () => {
     expect(result.success).toBe(false);
     expect(result.error).toContain("Syntax Error");
   });
+
+  it("should reject non-SELECT statements without executing them", () => {
+    const result = analyzeSql("DROP TABLE users;");
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Only SELECT queries are supported");
+  });
+
+  it("should reject input longer than 5000 characters", () => {
+    const result = analyzeSql(`SELECT '${"a".repeat(5000)}';`);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("maximum 5000 characters");
+  });
 });

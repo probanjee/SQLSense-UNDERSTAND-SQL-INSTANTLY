@@ -167,6 +167,7 @@ GROUP BY u.name;`,
                 <textarea
                   value={sqlQuery}
                   onChange={e => setSqlQuery(e.target.value)}
+                  maxLength={5000}
                   className="border-4 border-black bg-white w-full h-40 p-4 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="SELECT * FROM users WHERE..."
                 />

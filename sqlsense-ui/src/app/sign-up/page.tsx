@@ -6,6 +6,11 @@ import { useRouter } from "next/navigation";
 import Layout from "@/components/Layout";
 import { supabase } from "@/lib/supabase/client";
 import { useAuth } from "@/features/auth/AuthContext";
+import {
+  getFirstValidationMessage,
+  getSafeAuthErrorMessage,
+  signUpSchema,
+} from "@/features/auth/validation";
 import { toast } from "sonner";
 
 export default function SignUp() {
@@ -26,35 +31,38 @@ export default function SignUp() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !email || !password || !confirmPassword) {
-      toast.error("Please fill in all fields.");
-      return;
-    }
 
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match.");
-      return;
-    }
-
-    if (!terms) {
-      toast.error("You must agree to the Terms of Service and Privacy Policy.");
+    const validated = signUpSchema.safeParse({
+      fullName,
+      email,
+      password,
+      confirmPassword,
+      terms,
+    });
+    if (!validated.success) {
+      toast.error(getFirstValidationMessage(validated.error));
       return;
     }
 
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: validated.data.email,
+        password: validated.data.password,
         options: {
           data: {
-            full_name: fullName,
+            full_name: validated.data.fullName,
           },
         },
       });
 
       if (error) {
-        toast.error(error.message);
+        toast.error(
+          getSafeAuthErrorMessage(
+            error,
+            "Unable to create the account. Please try again.",
+          ),
+        );
       } else {
         if (data.session === null) {
           toast.success("Registration successful! Please check your email to verify your account.");
@@ -64,8 +72,13 @@ export default function SignUp() {
           router.push("/dashboard");
         }
       }
-    } catch (err: any) {
-      toast.error(err.message || "An unexpected error occurred.");
+    } catch (error: unknown) {
+      toast.error(
+        getSafeAuthErrorMessage(
+          error,
+          "Unable to create the account. Please try again.",
+        ),
+      );
     } finally {
       setLoading(false);
     }
@@ -80,8 +93,13 @@ export default function SignUp() {
         },
       });
       if (error) throw error;
-    } catch (err: any) {
-      toast.error(err.message || `Failed to sign up with ${provider}`);
+    } catch (error: unknown) {
+      toast.error(
+        getSafeAuthErrorMessage(
+          error,
+          `Unable to sign up with ${provider}. Please try again.`,
+        ),
+      );
     }
   };
 
@@ -102,11 +120,19 @@ export default function SignUp() {
               <form className="space-y-6" onSubmit={handleSignUp}>
                 {/* Full Name */}
                 <div>
-                  <label className="block text-sm font-bold uppercase mb-2">
+                  <label
+                    htmlFor="sign-up-full-name"
+                    className="block text-sm font-bold uppercase mb-2"
+                  >
                     Full Name
                   </label>
                   <input
+                    suppressHydrationWarning
+                    id="sign-up-full-name"
+                    name="fullName"
                     type="text"
+                    autoComplete="name"
+                    maxLength={100}
                     placeholder="John Doe"
                     value={fullName}
                     onChange={e => setFullName(e.target.value)}
@@ -117,11 +143,19 @@ export default function SignUp() {
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-bold uppercase mb-2">
+                  <label
+                    htmlFor="sign-up-email"
+                    className="block text-sm font-bold uppercase mb-2"
+                  >
                     Email
                   </label>
                   <input
+                    suppressHydrationWarning
+                    id="sign-up-email"
+                    name="email"
                     type="email"
+                    autoComplete="email"
+                    maxLength={254}
                     placeholder="your@email.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
@@ -132,11 +166,19 @@ export default function SignUp() {
 
                 {/* Password */}
                 <div>
-                  <label className="block text-sm font-bold uppercase mb-2">
+                  <label
+                    htmlFor="sign-up-password"
+                    className="block text-sm font-bold uppercase mb-2"
+                  >
                     Password
                   </label>
                   <input
+                    suppressHydrationWarning
+                    id="sign-up-password"
+                    name="password"
                     type="password"
+                    autoComplete="new-password"
+                    maxLength={72}
                     placeholder="••••••••"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
@@ -147,11 +189,19 @@ export default function SignUp() {
 
                 {/* Confirm Password */}
                 <div>
-                  <label className="block text-sm font-bold uppercase mb-2">
+                  <label
+                    htmlFor="sign-up-confirm-password"
+                    className="block text-sm font-bold uppercase mb-2"
+                  >
                     Confirm Password
                   </label>
                   <input
+                    suppressHydrationWarning
+                    id="sign-up-confirm-password"
+                    name="confirmPassword"
                     type="password"
+                    autoComplete="new-password"
+                    maxLength={72}
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
@@ -163,8 +213,10 @@ export default function SignUp() {
                 {/* Terms */}
                 <div className="flex items-start gap-2">
                   <input
+                    suppressHydrationWarning
                     type="checkbox"
                     id="terms"
+                    name="terms"
                     checked={terms}
                     onChange={e => setTerms(e.target.checked)}
                     className="w-4 h-4 border-2 border-black cursor-pointer mt-1"
@@ -180,6 +232,7 @@ export default function SignUp() {
 
                 {/* Sign Up Button */}
                 <button
+                  suppressHydrationWarning
                   type="submit"
                   disabled={loading}
                   className="border-4 border-primary bg-primary text-white font-bold uppercase text-sm px-6 py-3 w-full transition-transform duration-150 ease-out cursor-pointer disabled:opacity-50"
@@ -213,6 +266,7 @@ export default function SignUp() {
               {/* Social Sign Up */}
               <div className="space-y-3">
                 <button
+                  suppressHydrationWarning
                   onClick={() => handleSocialSignUp("github")}
                   className="border-4 border-black bg-white text-black font-bold uppercase text-sm px-6 py-3 w-full transition-transform duration-150 ease-out cursor-pointer"
                   style={{ boxShadow: "8px 8px 0px #111111" }}
@@ -228,6 +282,7 @@ export default function SignUp() {
                   SIGN UP WITH GITHUB
                 </button>
                 <button
+                  suppressHydrationWarning
                   onClick={() => handleSocialSignUp("google")}
                   className="border-4 border-black bg-white text-black font-bold uppercase text-sm px-6 py-3 w-full transition-transform duration-150 ease-out cursor-pointer"
                   style={{ boxShadow: "8px 8px 0px #111111" }}

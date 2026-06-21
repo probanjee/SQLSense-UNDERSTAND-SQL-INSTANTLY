@@ -20,6 +20,7 @@ sqlsense-ui/build/
 .env.test.local
 .env.production.local
 sqlsense-ui/.env*
+!sqlsense-ui/.env.example
 
 # IDE and editor files
 .vscode/

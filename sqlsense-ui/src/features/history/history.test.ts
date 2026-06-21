@@ -112,7 +112,7 @@ describe("Query History and Validation", () => {
         {
           query_text: payload.query_text,
           explanation: payload.explanation,
-          complexity: payload.complexity,
+          complexity: "Simple",
           optimization_tips: payload.optimization_tips,
         },
       ]);
@@ -138,10 +138,17 @@ describe("Query History and Validation", () => {
 
       (supabase.from as any).mockReturnValue(mockChain);
 
-      await deleteSavedQuery("query-id-123");
+      const queryId = "123e4567-e89b-12d3-a456-426614174000";
+      await deleteSavedQuery(queryId);
       expect(supabase.from).toHaveBeenCalledWith("saved_queries");
       expect(mockChain.delete).toHaveBeenCalled();
-      expect(mockChain.eq).toHaveBeenCalledWith("id", "query-id-123");
+      expect(mockChain.eq).toHaveBeenCalledWith("id", queryId);
+    });
+
+    it("should reject an invalid query ID before deletion", async () => {
+      await expect(deleteSavedQuery("not-a-uuid")).rejects.toThrow(
+        "Invalid saved query ID",
+      );
     });
   });
 });

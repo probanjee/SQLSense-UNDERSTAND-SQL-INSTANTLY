@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" source("..");
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -122,10 +122,6 @@
     padding-right: 1rem;
   }
 
-  .flex {
-    min-height: 0;
-    min-width: 0;
-  }
 
   @media (min-width: 640px) {
     .container {

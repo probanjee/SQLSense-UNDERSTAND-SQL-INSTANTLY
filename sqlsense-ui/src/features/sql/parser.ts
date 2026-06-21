@@ -10,8 +10,10 @@ export function parseSql(query: string): any {
   let ast: any;
   try {
     ast = parser.astify(cleanQuery);
-  } catch (err: any) {
-    throw new Error(`Syntax Error: ${err.message || "Invalid SQL query structure"}`);
+  } catch {
+    throw new Error(
+      "Syntax Error: The query could not be parsed. Check the SQL syntax and try again.",
+    );
   }
 
   // Handle multiple queries

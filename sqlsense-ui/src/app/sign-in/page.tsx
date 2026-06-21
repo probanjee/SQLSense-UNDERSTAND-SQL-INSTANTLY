@@ -6,6 +6,11 @@ import { useRouter } from "next/navigation";
 import Layout from "@/components/Layout";
 import { supabase } from "@/lib/supabase/client";
 import { useAuth } from "@/features/auth/AuthContext";
+import {
+  getFirstValidationMessage,
+  getSafeAuthErrorMessage,
+  signInSchema,
+} from "@/features/auth/validation";
 import { toast } from "sonner";
 
 export default function SignIn() {
@@ -23,26 +28,32 @@ export default function SignIn() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      toast.error("Please fill in all fields.");
+
+    const validated = signInSchema.safeParse({ email, password });
+    if (!validated.success) {
+      toast.error(getFirstValidationMessage(validated.error));
       return;
     }
 
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: validated.data.email,
+        password: validated.data.password,
       });
 
       if (error) {
-        toast.error(error.message);
+        toast.error(
+          getSafeAuthErrorMessage(error, "Unable to sign in. Please try again."),
+        );
       } else {
         toast.success("Successfully signed in!");
         router.push("/dashboard");
       }
-    } catch (err: any) {
-      toast.error(err.message || "An unexpected error occurred.");
+    } catch (error: unknown) {
+      toast.error(
+        getSafeAuthErrorMessage(error, "Unable to sign in. Please try again."),
+      );
     } finally {
       setLoading(false);
     }
@@ -57,8 +68,13 @@ export default function SignIn() {
         },
       });
       if (error) throw error;
-    } catch (err: any) {
-      toast.error(err.message || `Failed to sign in with ${provider}`);
+    } catch (error: unknown) {
+      toast.error(
+        getSafeAuthErrorMessage(
+          error,
+          `Unable to sign in with ${provider}. Please try again.`,
+        ),
+      );
     }
   };
 
@@ -79,11 +95,19 @@ export default function SignIn() {
               <form className="space-y-6" onSubmit={handleSignIn}>
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-bold uppercase mb-2">
+                  <label
+                    htmlFor="sign-in-email"
+                    className="block text-sm font-bold uppercase mb-2"
+                  >
                     Email
                   </label>
                   <input
+                    suppressHydrationWarning
+                    id="sign-in-email"
+                    name="email"
                     type="email"
+                    autoComplete="email"
+                    maxLength={254}
                     placeholder="your@email.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
@@ -94,11 +118,19 @@ export default function SignIn() {
 
                 {/* Password */}
                 <div>
-                  <label className="block text-sm font-bold uppercase mb-2">
+                  <label
+                    htmlFor="sign-in-password"
+                    className="block text-sm font-bold uppercase mb-2"
+                  >
                     Password
                   </label>
                   <input
+                    suppressHydrationWarning
+                    id="sign-in-password"
+                    name="password"
                     type="password"
+                    autoComplete="current-password"
+                    maxLength={72}
                     placeholder="••••••••"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
@@ -109,6 +141,7 @@ export default function SignIn() {
 
                 {/* Sign In Button */}
                 <button
+                  suppressHydrationWarning
                   type="submit"
                   disabled={loading}
                   className="border-4 border-primary bg-primary text-white font-bold uppercase text-sm px-6 py-3 w-full transition-transform duration-150 ease-out cursor-pointer disabled:opacity-50"
@@ -142,6 +175,7 @@ export default function SignIn() {
               {/* Social Sign In */}
               <div className="space-y-3">
                 <button
+                  suppressHydrationWarning
                   onClick={() => handleSocialSignIn("github")}
                   className="border-4 border-black bg-white text-black font-bold uppercase text-sm px-6 py-3 w-full transition-transform duration-150 ease-out cursor-pointer"
                   style={{ boxShadow: "8px 8px 0px #111111" }}
@@ -157,6 +191,7 @@ export default function SignIn() {
                   SIGN IN WITH GITHUB
                 </button>
                 <button
+                  suppressHydrationWarning
                   onClick={() => handleSocialSignIn("google")}
                   className="border-4 border-black bg-white text-black font-bold uppercase text-sm px-6 py-3 w-full transition-transform duration-150 ease-out cursor-pointer"
                   style={{ boxShadow: "8px 8px 0px #111111" }}
@@ -190,4 +225,3 @@ export default function SignIn() {
     </Layout>
   );
 }
-

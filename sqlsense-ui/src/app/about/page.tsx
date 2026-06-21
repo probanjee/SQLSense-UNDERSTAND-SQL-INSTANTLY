@@ -145,7 +145,7 @@ export default function About() {
                       <span>Email</span>
                     </a>
                     <a
-                      href="https://github.com/prosu"
+                      href="https://github.com/probanjee"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 border-2 border-black bg-white px-4 py-3 font-semibold text-sm hover:bg-primary hover:text-white transition-colors cursor-pointer"
@@ -155,7 +155,7 @@ export default function About() {
                       <span>GitHub</span>
                     </a>
                     <a
-                      href="https://linkedin.com/in/prosun-banerjee"
+                      href="https://www.linkedin.com/in/prosun-banerjee-545942293/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 border-2 border-black bg-white px-4 py-3 font-semibold text-sm hover:bg-primary hover:text-white transition-colors cursor-pointer"

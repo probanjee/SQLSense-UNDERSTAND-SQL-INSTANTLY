@@ -242,7 +242,7 @@ export default function Layout({ children, currentPage }: LayoutProps) {
               </p>
               <div className="flex gap-3 text-xs text-muted-foreground mb-4">
                 <a
-                  href="https://github.com/prosu"
+                  href="https://github.com/probanjee"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors font-semibold cursor-pointer"
@@ -251,7 +251,7 @@ export default function Layout({ children, currentPage }: LayoutProps) {
                 </a>
                 <span>•</span>
                 <a
-                  href="https://linkedin.com/in/prosun-banerjee"
+                  href="https://www.linkedin.com/in/prosun-banerjee-545942293/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-primary transition-colors font-semibold cursor-pointer"
