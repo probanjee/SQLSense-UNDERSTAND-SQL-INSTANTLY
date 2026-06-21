@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Layout from "@/components/Layout";
-import { Copy, ArrowRight, TrendingUp, Zap } from "lucide-react";
+import { Copy, ArrowRight, TrendingUp, Zap, AlertTriangle } from "lucide-react";
+import { analyzeSql } from "@/features/sql/analyzeSql";
 
 export default function Home() {
   const [sqlQuery, setSqlQuery] = useState(`SELECT u.name,
@@ -13,46 +14,48 @@ LEFT JOIN orders o
 ON u.id = o.user_id
 GROUP BY u.name;`);
 
-  const [showExplanation, setShowExplanation] = useState(true);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const breakdownData = [
-    {
-      clause: "SELECT u.name, COUNT(o.id)",
-      meaning: "Retrieves user names and counts their orders",
-    },
-    { clause: "FROM users u", meaning: "Main table: users, aliased as u" },
-    {
-      clause: "LEFT JOIN orders o",
-      meaning: "Joins orders table, keeping all users even without orders",
-    },
-    {
-      clause: "ON u.id = o.user_id",
-      meaning: "Join condition: match user ID with order user_id",
-    },
-    {
-      clause: "GROUP BY u.name",
-      meaning: "Groups results by user name for aggregation",
-    },
+  const samples = [
+    `SELECT u.name, COUNT(o.id)
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+GROUP BY u.name;`,
+    `SELECT name, price FROM products WHERE price > 100 ORDER BY price DESC;`,
+    `SELECT category, AVG(price) AS avg_price FROM products GROUP BY category HAVING AVG(price) > 50;`,
+    `SELECT * FROM users WHERE age > 18 LIMIT 5;`
   ];
 
-  const optimizationTips = [
-    "Add index on users.id for faster joins",
-    "Consider filtering before aggregation for large datasets",
-    "Verify that LEFT JOIN is necessary vs INNER JOIN",
-    "Monitor query execution plan for sequential scans",
-  ];
+  const [sampleIdx, setSampleIdx] = useState(0);
 
-  const queryFlow = [
-    "users table",
-    "↓",
-    "LEFT JOIN orders",
-    "↓",
-    "GROUP BY u.name",
-    "↓",
-    "COUNT aggregation",
-    "↓",
-    "Result set",
-  ];
+  const handleExplain = (queryToUse?: string) => {
+    setError(null);
+    const query = queryToUse !== undefined ? queryToUse : sqlQuery;
+    const result = analyzeSql(query);
+    if (result.success) {
+      setAnalysis(result);
+      setShowExplanation(true);
+    } else {
+      setError(result.error || "An error occurred during parsing.");
+      setShowExplanation(false);
+    }
+  };
+
+  const handleSample = () => {
+    const nextIdx = (sampleIdx + 1) % samples.length;
+    setSampleIdx(nextIdx);
+    const query = samples[nextIdx];
+    setSqlQuery(query);
+    handleExplain(query);
+  };
+
+  // Run initial explanation on default query on mount
+  useEffect(() => {
+    handleExplain();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Layout currentPage="/">
@@ -72,7 +75,7 @@ GROUP BY u.name;`);
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => setShowExplanation(!showExplanation)}
+                onClick={() => handleExplain()}
                 className="border-4 border-primary bg-primary text-white font-bold uppercase text-sm px-6 py-3 transition-transform duration-150 ease-out cursor-pointer"
                 style={{ boxShadow: "8px 8px 0px #6D28D9" }}
                 onMouseEnter={e => {
@@ -130,7 +133,7 @@ GROUP BY u.name;`);
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={() => setShowExplanation(!showExplanation)}
+                  onClick={() => handleExplain()}
                   className="flex-1 border-4 border-primary bg-primary text-white font-bold uppercase text-sm px-6 py-3 transition-transform duration-150 ease-out cursor-pointer"
                   style={{ boxShadow: "8px 8px 0px #6D28D9" }}
                   onMouseEnter={e => {
@@ -145,6 +148,7 @@ GROUP BY u.name;`);
                   EXPLAIN QUERY
                 </button>
                 <button
+                  onClick={handleSample}
                   className="flex-1 border-4 border-black bg-white text-black font-bold uppercase text-sm px-6 py-3 transition-transform duration-150 ease-out cursor-pointer"
                   style={{ boxShadow: "8px 8px 0px #111111" }}
                   onMouseEnter={e => {
@@ -159,7 +163,7 @@ GROUP BY u.name;`);
                   SAMPLE QUERIES
                 </button>
                 <button
-                  onClick={() => setSqlQuery("")}
+                  onClick={() => { setSqlQuery(""); setError(null); }}
                   className="flex-1 border-4 border-black bg-white text-black font-bold uppercase text-sm px-6 py-3 transition-transform duration-150 ease-out cursor-pointer"
                   style={{ boxShadow: "8px 8px 0px #111111" }}
                   onMouseEnter={e => {
@@ -175,12 +179,27 @@ GROUP BY u.name;`);
                 </button>
               </div>
             </div>
+
+            {error && (
+              <div
+                className="mt-6 border-4 border-red-500 bg-red-50 p-6"
+                style={{ boxShadow: "8px 8px 0px #EF4444" }}
+              >
+                <div className="flex items-center gap-3 mb-2 text-red-700">
+                  <AlertTriangle className="w-6 h-6 flex-shrink-0" />
+                  <h3 className="font-bold text-lg uppercase">Query Parsing Error</h3>
+                </div>
+                <p className="font-mono text-sm text-red-600 bg-white p-3 border-2 border-red-200 break-words">
+                  {error}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* Explanation Section */}
-      {showExplanation && (
+      {showExplanation && analysis && (
         <section className="bg-white py-16 md:py-24 lg:py-32 border-b-4 border-black">
           <div className="container">
             <div className="max-w-4xl mx-auto">
@@ -193,11 +212,7 @@ GROUP BY u.name;`);
                 style={{ boxShadow: "8px 8px 0px #111111" }}
               >
                 <p className="text-lg leading-relaxed">
-                  This query retrieves each user's name and counts the number of
-                  orders associated with that user. It uses a LEFT JOIN to
-                  ensure all users are included in the results, even those
-                  without any orders. The results are grouped by user name to
-                  aggregate the order counts.
+                  {analysis.explanation}
                 </p>
               </div>
 
@@ -221,11 +236,11 @@ GROUP BY u.name;`);
                     </tr>
                   </thead>
                   <tbody>
-                    {breakdownData.map((row, idx) => (
+                    {analysis.breakdown?.map((row: any, idx: number) => (
                       <tr
                         key={idx}
                         className={
-                          idx < breakdownData.length - 1
+                          idx < (analysis.breakdown.length - 1)
                             ? "border-b-2 border-gray-200"
                             : ""
                         }
@@ -251,12 +266,11 @@ GROUP BY u.name;`);
                     <h4 className="text-lg font-bold uppercase">Complexity</h4>
                   </div>
                   <p className="text-4xl font-bold text-primary mb-2">
-                    INTERMEDIATE
+                    {analysis.complexity}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    This query involves joins and aggregation, making it
-                    moderately complex.
-                </p>
+                    {analysis.complexityReason}
+                  </p>
                 </div>
 
                 <div
@@ -267,7 +281,7 @@ GROUP BY u.name;`);
                     <Zap className="w-8 h-8 text-secondary" />
                     <h4 className="text-lg font-bold uppercase">Confidence</h4>
                   </div>
-                  <p className="text-4xl font-bold text-secondary mb-2">92%</p>
+                  <p className="text-4xl font-bold text-secondary mb-2">{analysis.confidence}%</p>
                   <p className="text-sm text-muted-foreground">
                     High confidence in this analysis based on standard SQL
                     patterns.
@@ -284,7 +298,7 @@ GROUP BY u.name;`);
                 style={{ boxShadow: "8px 8px 0px #111111" }}
               >
                 <ul className="space-y-4">
-                  {optimizationTips.map((tip, idx) => (
+                  {analysis.optimizationTips?.map((tip: string, idx: number) => (
                     <li key={idx} className="flex gap-4 items-start">
                       <span className="inline-flex items-center justify-center w-6 h-6 bg-primary text-white font-bold text-sm flex-shrink-0 mt-1">
                         {idx + 1}
@@ -304,7 +318,7 @@ GROUP BY u.name;`);
                 style={{ boxShadow: "8px 8px 0px #111111" }}
               >
                 <div className="flex flex-col items-center gap-4">
-                  {queryFlow.map((step, idx) => (
+                  {analysis.flowSteps?.map((step: string, idx: number) => (
                     <div key={idx} className="text-center">
                       {idx > 0 && idx % 2 === 0 && (
                         <div className="text-3xl font-bold text-primary mb-4">
