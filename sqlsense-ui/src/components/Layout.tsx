@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
 
@@ -28,15 +29,20 @@ export default function Layout({ children, currentPage }: LayoutProps) {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header */}
       <header className="border-b-4 border-black bg-white sticky top-0 z-40">
-        <div className="container flex items-center justify-between h-16 md:h-20">
+        <div className="container relative flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 font-bold text-xl md:text-2xl hover:opacity-80 transition-opacity cursor-pointer"
+            className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center gap-2 font-bold text-xl md:text-2xl hover:opacity-80 transition-opacity cursor-pointer"
           >
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-primary border-2 border-black flex items-center justify-center">
-              <span className="text-white font-bold">S</span>
-            </div>
+            <Image
+              src="/logo.png"
+              alt="SQLSense - Student Learning Lab Inquiry"
+              width={56}
+              height={56}
+              className="h-[44px] w-[44px] md:h-[56px] md:w-[56px] object-contain"
+              priority
+            />
             <span className="hidden sm:inline">SQLSense</span>
           </Link>
 
@@ -189,8 +195,17 @@ export default function Layout({ children, currentPage }: LayoutProps) {
         <div className="container py-12 md:py-16">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {/* Brand */}
-            <div>
-              <h3 className="font-bold text-lg mb-2">SQLSense</h3>
+            <div className="flex flex-col items-center md:items-start text-center md:text-left">
+              <div className="flex items-center gap-2 mb-2">
+                <Image
+                  src="/logo.png"
+                  alt="SQLSense - Student Learning Lab Inquiry"
+                  width={48}
+                  height={48}
+                  className="h-[36px] w-[36px] md:h-[48px] md:w-[48px] object-contain"
+                />
+                <span className="font-bold text-lg">SQLSense</span>
+              </div>
               <p className="text-sm text-muted-foreground">
                 Understand SQL Instantly. Transform complex queries into clear
                 explanations.
@@ -259,7 +274,7 @@ export default function Layout({ children, currentPage }: LayoutProps) {
                   LinkedIn
                 </a>
               </div>
-              <button
+              {/* <button
                 className="border-4 border-black bg-white text-black font-bold uppercase text-xs px-3 py-2 transition-transform duration-150 ease-out cursor-pointer"
                 style={{ boxShadow: "8px 8px 0px #111111" }}
                 onMouseEnter={e => {
@@ -272,7 +287,7 @@ export default function Layout({ children, currentPage }: LayoutProps) {
                 }}
               >
                 Built for Digital Heroes
-              </button>
+              </button> */}
             </div>
           </div>
 
