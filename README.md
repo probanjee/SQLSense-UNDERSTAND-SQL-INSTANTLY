@@ -135,7 +135,6 @@ Every standard application page uses the shared footer containing:
 
 - Prosun Banerjee
 - prosunbanerjee8@gmail.com
-- Button text exactly: **Built for Digital Heroes**
 
 ## Cost
 
