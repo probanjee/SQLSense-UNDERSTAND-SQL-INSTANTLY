@@ -281,6 +281,7 @@ export default function SignUp() {
                 >
                   SIGN UP WITH GITHUB
                 </button>
+                {/* Google sign-up temporarily disabled
                 <button
                   suppressHydrationWarning
                   onClick={() => handleSocialSignUp("google")}
@@ -297,6 +298,7 @@ export default function SignUp() {
                 >
                   SIGN UP WITH GOOGLE
                 </button>
+                */}
               </div>
 
               {/* Sign In Link */}

@@ -190,6 +190,7 @@ export default function SignIn() {
                 >
                   SIGN IN WITH GITHUB
                 </button>
+                {/* Google sign-in temporarily disabled
                 <button
                   suppressHydrationWarning
                   onClick={() => handleSocialSignIn("google")}
@@ -206,6 +207,7 @@ export default function SignIn() {
                 >
                   SIGN IN WITH GOOGLE
                 </button>
+                */}
               </div>
 
               {/* Sign Up Link */}
